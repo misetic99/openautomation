@@ -18,6 +18,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - run: pnpm test
+      - run: node scripts/check-packages.mjs
 
   bridge:
     runs-on: windows-latest
@@ -28,3 +29,4 @@ jobs:
           dotnet-version: 8.0.x
       # Builds without the Siemens reference; the real exporter needs a local TIA Portal.
       - run: dotnet test bridge/OpenAutomation.Bridge.sln
+      - run: powershell -NoProfile -File scripts/check-determinism.test.ps1

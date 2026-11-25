@@ -26,11 +26,13 @@ namespace OpenAutomation.Bridge
             "InterfaceModifiedDate",
             "ParameterModifiedDate",
             "CompileDate",
+            // AutomationML (hardware export): time the file was written.
+            "LastWritingDateTime",
         };
 
         public static string Normalize(string xml)
         {
-            XDocument doc = XDocument.Parse(xml.TrimStart('﻿'), LoadOptions.None);
+            XDocument doc = XDocument.Parse(xml.TrimStart('\uFEFF'), LoadOptions.None);
 
             doc.Descendants()
                .Where(e => VolatileElements.Contains(e.Name.LocalName))

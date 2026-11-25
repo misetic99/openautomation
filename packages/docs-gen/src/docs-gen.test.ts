@@ -7,6 +7,7 @@ import { afterAll, describe, expect, it } from "vitest";
 import { loadProject } from "@openautomation/core";
 import {
   buildCrossReferences,
+  buildHardwareList,
   buildIoList,
   generateDocs,
   ioColumns,
@@ -18,10 +19,10 @@ const fixture = fileURLToPath(new URL("../../../corpus/synthetic/v18/basic", imp
 
 describe("parseIoAddress", () => {
   it("reads bit, byte, word and double word addresses", () => {
-    expect(parseIoAddress("%I0.3")).toEqual({ area: "Input", byte: 0, bit: 3 });
-    expect(parseIoAddress("%QW64")).toEqual({ area: "Output", byte: 64, bit: -1 });
-    expect(parseIoAddress("%ID100")).toEqual({ area: "Input", byte: 100, bit: -1 });
-    expect(parseIoAddress("%IW64:P")).toEqual({ area: "Input", byte: 64, bit: -1 });
+    expect(parseIoAddress("%I0.3")).toEqual({ area: "Input", byte: 0, bit: 3, size: 1 });
+    expect(parseIoAddress("%QW64")).toEqual({ area: "Output", byte: 64, bit: -1, size: 2 });
+    expect(parseIoAddress("%ID100")).toEqual({ area: "Input", byte: 100, bit: -1, size: 4 });
+    expect(parseIoAddress("%IW64:P")).toEqual({ area: "Input", byte: 64, bit: -1, size: 2 });
   });
 
   it("rejects memory addresses and malformed ones", () => {
@@ -62,6 +63,71 @@ describe("IO list", () => {
 
     expect(rows.get("Start")!.usedIn).toEqual(["Main", "Motors/FC_MotorControl"]);
     expect(rows.get("Unused")!.usedIn).toEqual([]);
+  });
+});
+
+describe("module matching", () => {
+  it("names the module that provides each channel", async () => {
+    const project = await loadProject(fixture);
+    const rows = new Map(buildIoList(project.plcs[0]!, project.hardware).map((r) => [r.name, r]));
+
+    expect(rows.get("Start")!.module).toBe("PLC_1 / DI 16x24VDC_1");
+    expect(rows.get("MotorRun")!.module).toBe("PLC_1 / DQ 16x24VDC_1");
+    // A word at %IW64 sits inside the analog input module that starts at byte 64.
+    expect(rows.get("AnalogIn")!.module).toBe("PLC_1 / AI 4xU/I_1");
+    expect(rows.get("AnalogOut")!.module).toBe("PLC_1 / AQ 2xU/I_1");
+  });
+
+  it("leaves the module empty without hardware, or when nothing covers the address", async () => {
+    const project = await loadProject(fixture);
+    expect(buildIoList(project.plcs[0]!).every((r) => r.module === "")).toBe(true);
+
+    const plc = structuredClone(project.plcs[0]!);
+    plc.tagTables[0]!.tags[0]!.address = "%I500.0";
+    expect(buildIoList(plc, project.hardware).find((r) => r.address === "%I500.0")!.module).toBe("");
+  });
+
+  it("does not guess when two modules of the PLC cover the same address", async () => {
+    const project = await loadProject(fixture);
+    const doubled = structuredClone(project.hardware);
+    const plc = doubled.find((d) => d.plc === "PLC_1")!;
+    plc.items.push(structuredClone(plc.items[1]!));
+
+    const row = buildIoList(project.plcs[0]!, doubled).find((r) => r.name === "Start")!;
+    expect(row.module).toBe("");
+  });
+
+  it("only uses a module of another station when it is the single match", async () => {
+    const project = await loadProject(fixture);
+    const plc = structuredClone(project.plcs[0]!);
+    plc.tagTables[0]!.tags[0]!.address = "%I10.3";
+
+    const row = buildIoList(plc, project.hardware).find((r) => r.address === "%I10.3")!;
+    expect(row.module).toBe("IO_Device_1 / IO_Device_1 / DI 8x24VDC_1");
+  });
+});
+
+describe("hardware list", () => {
+  it("lists every rack item in rack order, with address ranges", async () => {
+    const { hardware } = await loadProject(fixture);
+    const rows = buildHardwareList(hardware);
+
+    expect(rows.map((r) => r.module)).toEqual([
+      "PLC_1",
+      "PLC_1 / PROFINET interface_1",
+      "DI 16x24VDC_1",
+      "DQ 16x24VDC_1",
+      "AI 4xU/I_1",
+      "AQ 2xU/I_1",
+      "IO_Device_1",
+      "IO_Device_1 / PROFINET interface_1",
+      "IO_Device_1 / DI 8x24VDC_1",
+    ]);
+
+    const di = rows.find((r) => r.module === "DI 16x24VDC_1")!;
+    expect(di).toMatchObject({ device: "PLC_1", slot: 2, inputs: "0..1 (16 bit)", outputs: "" });
+    expect(rows.find((r) => r.module === "AQ 2xU/I_1")!.outputs).toBe("64..67 (32 bit)");
+    expect(rows.find((r) => r.module === "PLC_1 / PROFINET interface_1")!.networkAddress).toBe("192.168.0.1");
   });
 });
 
@@ -118,6 +184,9 @@ describe("generateDocs", () => {
     await generateDocs(project, b);
 
     expect(written).toEqual([
+      "alarm-list.csv",
+      "alarm-list.xlsx",
+      "hardware-list.csv",
       "PLC_1/io-list.csv",
       "PLC_1/cross-references.csv",
       "PLC_1/io-list.xlsx",
@@ -139,7 +208,7 @@ describe("generateDocs", () => {
 
     const book = new ExcelJS.Workbook();
     await book.xlsx.readFile(join(out, "PLC_1", "io-list.xlsx"));
-    expect(book.worksheets.map((s) => s.name)).toEqual(["IO list", "Cross references"]);
+    expect(book.worksheets.map((s) => s.name)).toEqual(["IO list", "Alarms", "Cross references", "Hardware"]);
     expect(book.getWorksheet("IO list")!.rowCount).toBe(9);
     expect(book.getWorksheet("IO list")!.getRow(2).getCell(3).value).toBe("Start");
   });

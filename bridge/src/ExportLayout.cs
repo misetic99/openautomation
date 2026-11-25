@@ -14,6 +14,7 @@ namespace OpenAutomation.Bridge
     ///   &lt;out&gt;/&lt;plc&gt;/blocks/&lt;group...&gt;/&lt;Name&gt;.xml   (+ .scl or .awl for text blocks)
     ///   &lt;out&gt;/&lt;plc&gt;/types/&lt;group...&gt;/&lt;Name&gt;.xml
     ///   &lt;out&gt;/&lt;plc&gt;/tags/&lt;group...&gt;/&lt;Table&gt;.xml
+    ///   &lt;out&gt;/hardware/devices.json, &lt;out&gt;/hardware/hardware.aml
     /// </summary>
     internal static class ExportLayout
     {
@@ -21,6 +22,9 @@ namespace OpenAutomation.Bridge
         public const string Blocks = "blocks";
         public const string Types = "types";
         public const string Tags = "tags";
+        public const string Hardware = "hardware";
+        public const string DevicesFile = "hardware/devices.json";
+        public const string AmlFile = "hardware/hardware.aml";
 
         private static readonly HashSet<string> ReservedNames = new HashSet<string>(
             new[] { "CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6",

@@ -9,20 +9,34 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
       "default": "./dist/index.js"
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "sideEffects": false,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/openautomation/openautomation.git",
+    "url": "git+https://github.com/misetic99/openautomation.git",
     "directory": "packages/docs-gen"
   },
   "dependencies": {
     "@openautomation/core": "workspace:*",
-    "exceljs": "^4.4.0"
+    "exceljs": "^4.4.0",
+    "jszip": "3.10.1"
+  },
+  "bugs": {
+    "url": "https://github.com/misetic99/openautomation/issues"
+  },
+  "homepage": "https://github.com/misetic99/openautomation/tree/main/packages/docs-gen#readme",
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

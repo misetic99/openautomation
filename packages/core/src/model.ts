@@ -32,6 +32,8 @@ export interface TagTable {
 /** One use of a global name (a tag or a DB) inside a block. */
 export interface Reference {
   name: string;
+  /** Present only when the producer can establish the access direction. */
+  access?: "read" | "write" | "readwrite";
   /** How many times the block accesses it. */
   count: number;
 }
@@ -69,6 +71,41 @@ export interface Plc {
   tagTables: TagTable[];
 }
 
+/** An I/O address range of a module. */
+export interface AddressRange {
+  /** `Input` or `Output`, as TIA Portal names them. */
+  ioType: string;
+  /** Start address in bytes. */
+  start: number;
+  /** Length in bits. */
+  length: number;
+}
+
+/** A rack, CPU, interface or module inside a station. Items nest. */
+export interface HardwareItem {
+  name: string;
+  /** For example `OrderNumber:6ES7 521-1BH00-0AB0/V2.1`. */
+  typeIdentifier: string;
+  /** Slot number. */
+  position?: number;
+  networkAddress?: string;
+  addresses: AddressRange[];
+  items: HardwareItem[];
+}
+
+/** A station in the project: a PLC, an HMI, an I/O device, a switch. */
+export interface HardwareDevice {
+  name: string;
+  typeIdentifier: string;
+  /** Project tree folders the station sits in, outermost first. */
+  group: string[];
+  /** Kind of software it hosts, for example `PlcSoftware` or `HmiTarget`. */
+  software?: string;
+  /** Name of the matching entry in `ProjectModel.plcs`, when it hosts a PLC. */
+  plc?: string;
+  items: HardwareItem[];
+}
+
 /**
  * In-memory model of one exported TIA Portal project.
  *
@@ -81,10 +118,29 @@ export interface ProjectModel {
   /** TIA Portal version the export came from, for example `V18`. Empty if unknown. */
   tiaVersion: string;
   plcs: Plc[];
+  /** Every station, from `hardware/devices.json`. Empty when the export has none. */
+  hardware: HardwareDevice[];
+  /** Optional normalized alarm data; absent in exports without alarm files. */
+  alarms?: Alarm[];
   /** Files that could not be read or understood. Never silently dropped. */
   warnings: string[];
 }
 
+/** A normalized alarm, independent of any version-specific engineering API. */
+export interface Alarm {
+  id: string;
+  name: string;
+  texts: Record<string, string>;
+  source: "PLC" | "HMI";
+  /** Name of the device folder that supplied this alarm. */
+  device: string;
+  plc?: string;
+  class?: string;
+  /** Global PLC tag name, after resolving any HMI connection mapping. */
+  triggerTag?: string;
+  triggerBit?: number;
+}
+
 export function emptyProject(): ProjectModel {
-  return { schemaVersion: 1, tiaVersion: "", plcs: [], warnings: [] };
+  return { schemaVersion: 1, tiaVersion: "", plcs: [], hardware: [], warnings: [] };
 }

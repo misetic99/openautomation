@@ -1,0 +1,24 @@
+{
+  "format": 1,
+  "alarms": [
+    {
+      "id": "100",
+      "name": "MotorOverload",
+      "texts": { "de-DE": "Motorueberlast", "en-US": "Motor overload" },
+      "source": "HMI",
+      "plc": "PLC_1",
+      "class": "Fault",
+      "triggerTag": "Overload",
+      "triggerBit": 0
+    },
+    {
+      "id": "200",
+      "name": "DriveStopped",
+      "texts": { "en-US": "Drive stopped" },
+      "source": "PLC",
+      "plc": "PLC_1",
+      "class": "Warning",
+      "triggerTag": "MotorRun"
+    }
+  ]
+}

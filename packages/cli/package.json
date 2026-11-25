@@ -4,16 +4,40 @@
   "description": "Command line interface for OpenAutomation",
   "license": "MIT",
   "type": "module",
-  "bin": { "openautomation": "./dist/bin.js" },
+  "bin": {
+    "openautomation": "./dist/bin.js"
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist"],
-  "repository": { "type": "git", "url": "git+https://github.com/openautomation/openautomation.git", "directory": "packages/cli" },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/misetic99/openautomation.git",
+    "directory": "packages/cli"
+  },
   "dependencies": {
     "@openautomation/core": "workspace:*",
-    "@openautomation/diff": "workspace:*",
-    "@openautomation/docs-gen": "workspace:*",
-    "@openautomation/lint": "workspace:*",
-    "@openautomation/render": "workspace:*"
+    "@openautomation/docs-gen": "workspace:*"
+  },
+  "bugs": {
+    "url": "https://github.com/misetic99/openautomation/issues"
+  },
+  "homepage": "https://github.com/misetic99/openautomation/tree/main/packages/cli#readme",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

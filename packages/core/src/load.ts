@@ -1,7 +1,9 @@
 import { readdir, readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
-import type { Block, Plc, PlcType, ProjectModel, TagTable } from "./model.js";
+import type { Alarm, Block, HardwareDevice, Plc, PlcType, ProjectModel, TagTable } from "./model.js";
+import { parseAlarms } from "./parse-alarms.js";
 import { parseBlock, parseType } from "./parse-blocks.js";
+import { parseHardware } from "./parse-hardware.js";
 import { parseTagTable } from "./parse-tags.js";
 import { compare } from "./xml.js";
 
@@ -20,6 +22,14 @@ interface Found {
 async function isDirectory(path: string): Promise<boolean> {
   try {
     return (await stat(path)).isDirectory();
+  } catch {
+    return false;
+  }
+}
+
+async function isFile(path: string): Promise<boolean> {
+  try {
+    return (await stat(path)).isFile();
   } catch {
     return false;
   }
@@ -146,7 +156,39 @@ export async function loadProject(root: string): Promise<ProjectModel> {
 
   if (!plcNames) {
     const entries = await readdir(root, { withFileTypes: true });
-    plcNames = entries.filter((e) => e.isDirectory()).map((e) => e.name);
+    plcNames = entries
+      .filter((e) => e.isDirectory() && e.name !== "hardware" && e.name !== "hmi")
+      .map((e) => e.name);
+  }
+
+  // Older exports have no hardware folder; that is not a problem. A broken one is.
+  let hardware: HardwareDevice[] = [];
+  const devicesFile = join(root, "hardware", "devices.json");
+  if (await isFile(devicesFile)) {
+    try {
+      hardware = parseHardware(await readText(devicesFile));
+    } catch (error) {
+      warnings.push(
+        `hardware/devices.json: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+
+  const alarms: Alarm[] = [];
+  let hasAlarmFiles = false;
+  if (await isDirectory(join(root, "hmi"))) {
+    const devices = (await readdir(join(root, "hmi"), { withFileTypes: true }))
+      .filter((entry) => entry.isDirectory()).sort((a, b) => compare(a.name, b.name));
+    for (const device of devices) {
+      const relative = `hmi/${device.name}/alarms.json`;
+      if (!(await isFile(join(root, relative)))) continue;
+      hasAlarmFiles = true;
+      try {
+        alarms.push(...parseAlarms(await readText(join(root, relative)), device.name));
+      } catch (error) {
+        warnings.push(`${relative}: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    }
   }
 
   const plcs: Plc[] = [];
@@ -158,6 +200,8 @@ export async function loadProject(root: string): Promise<ProjectModel> {
     schemaVersion: 1,
     tiaVersion,
     plcs,
+    hardware,
+    ...(hasAlarmFiles ? { alarms } : {}),
     warnings: warnings.sort(compare),
   };
 }

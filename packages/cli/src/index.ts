@@ -15,7 +15,7 @@ const consoleIo: Io = {
 const USAGE = `Usage: openautomation <command> [options]
 
 Commands:
-  docs <export-dir> [--out <dir>]   Write the I/O list (CSV, Excel) and cross references
+  docs <export-dir> [--out <dir>]   Write I/O, hardware, alarm and cross-reference reports
   model <export-dir>                Print the project model as JSON
   diff, lint, render                Not implemented yet
 
@@ -77,7 +77,7 @@ export async function run(argv: string[], io: Io = consoleIo): Promise<number> {
         const outDir = resolve(options.get("out") ?? "openautomation-docs");
         const written = await generateDocs(project, outDir);
         if (written.length === 0) {
-          io.err("No PLC found in the export, nothing written.");
+          io.err("No report data found in the export, nothing written.");
           return 1;
         }
         io.out(`Wrote ${written.length} files to ${outDir}`);

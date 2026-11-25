@@ -1,0 +1,98 @@
+{
+  "format": 1,
+  "devices": [
+    {
+      "name": "IO_Device_1",
+      "typeIdentifier": "OrderNumber:6ES7 155-6AU01-0CN0/V4.2",
+      "group": [
+        "Field"
+      ],
+      "items": [
+        {
+          "name": "IO_Device_1",
+          "typeIdentifier": "OrderNumber:6ES7 155-6AU01-0CN0/V4.2",
+          "position": 0,
+          "addresses": [],
+          "items": [
+            {
+              "name": "PROFINET interface_1",
+              "typeIdentifier": "System:Rack.Interface",
+              "networkAddress": "192.168.0.20",
+              "addresses": [],
+              "items": []
+            },
+            {
+              "name": "DI 8x24VDC_1",
+              "typeIdentifier": "OrderNumber:6ES7 131-6BF01-0BA0/V0.0",
+              "position": 1,
+              "addresses": [
+                { "ioType": "Input", "start": 10, "length": 8 }
+              ],
+              "items": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "PLC_1",
+      "typeIdentifier": "OrderNumber:6ES7 513-1AL02-0AB0/V2.9",
+      "group": [],
+      "software": "PlcSoftware",
+      "plc": "PLC_1",
+      "items": [
+        {
+          "name": "PLC_1",
+          "typeIdentifier": "OrderNumber:6ES7 513-1AL02-0AB0/V2.9",
+          "position": 1,
+          "addresses": [],
+          "items": [
+            {
+              "name": "PROFINET interface_1",
+              "typeIdentifier": "System:Rack.Interface",
+              "networkAddress": "192.168.0.1",
+              "addresses": [],
+              "items": []
+            }
+          ]
+        },
+        {
+          "name": "DI 16x24VDC_1",
+          "typeIdentifier": "OrderNumber:6ES7 521-1BH00-0AB0/V2.1",
+          "position": 2,
+          "addresses": [
+            { "ioType": "Input", "start": 0, "length": 16 }
+          ],
+          "items": []
+        },
+        {
+          "name": "DQ 16x24VDC_1",
+          "typeIdentifier": "OrderNumber:6ES7 522-1BH00-0AB0/V2.1",
+          "position": 3,
+          "addresses": [
+            { "ioType": "Output", "start": 0, "length": 16 }
+          ],
+          "items": []
+        },
+        {
+          "name": "AI 4xU/I_1",
+          "typeIdentifier": "OrderNumber:6ES7 531-7KF00-0AB0/V2.2",
+          "position": 4,
+          "addresses": [
+            { "ioType": "Input", "start": 64, "length": 64 }
+          ],
+          "items": []
+        },
+        {
+          "name": "AQ 2xU/I_1",
+          "typeIdentifier": "OrderNumber:6ES7 532-5HD00-0AB0/V2.2",
+          "position": 5,
+          "addresses": [
+            { "ioType": "Output", "start": 64, "length": 32 }
+          ],
+          "items": []
+        }
+      ]
+    }
+  ]
+}

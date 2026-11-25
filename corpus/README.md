@@ -1,7 +1,8 @@
 # Corpus
 
-Anonymized exports from TIA Portal V17 to V21, used as test data. SimaticML differs between
-versions, so every parser change is tested against exports from each of them.
+This directory is intended to hold anonymized exports from TIA Portal V17 to V21. It currently
+contains only explicitly labeled synthetic fixtures. Native version coverage has not yet been
+established. See the [fixture guide](../docs/fixtures.md) before adding data.
 
 Layout: `corpus/<version>/<case>/` (for example `corpus/v18/lad-motor-start/`).
 

@@ -27,6 +27,17 @@ pnpm test
 Node.js 20+ and pnpm are required. The C# bridge needs Windows and TIA Portal, so you only need it
 when working in `bridge/`.
 
+The bridge helpers and their tests build without the proprietary assembly:
+
+```sh
+dotnet test bridge/OpenAutomation.Bridge.sln
+```
+
+See the [export contract](docs/export-format.md), [parser guide](docs/adding-a-parser.md) and
+[fixture guide](docs/fixtures.md) before extending a format. Package preparation is documented
+in the [release checklist](docs/releasing.md). To test the determinism checker without TIA Portal,
+run `powershell -File scripts/check-determinism.test.ps1` on Windows.
+
 ## Pull requests
 
 1. Open an issue first for anything bigger than a small fix.
@@ -39,6 +50,8 @@ We aim to reply to every PR within 48 hours.
 ## Principles
 
 - Export must stay **deterministic**: stable ordering, no timestamps or other volatile data.
+- Every new generated file needs byte-level determinism coverage across clocks and directories.
+- Native API calls require version-specific evidence; a stub alone is not verification.
 - Everything outside `bridge/` must run without TIA Portal.
 - No Siemens trademarks in names or logos.
 - Code, docs and issues are in English.

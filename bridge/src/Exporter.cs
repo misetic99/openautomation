@@ -1,4 +1,5 @@
 #if TIA_OPENNESS
+#nullable disable
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -27,6 +28,7 @@ namespace OpenAutomation.Bridge
         private readonly string _staging;
         private readonly List<string> _skipped = new List<string>();
         private readonly Dictionary<string, int> _counts = new Dictionary<string, int>();
+        private readonly List<HwDevice> _hardware = new List<HwDevice>();
 
         public Exporter(DirectoryInfo output, string tiaVersion, bool upgrade)
         {
@@ -68,21 +70,42 @@ namespace OpenAutomation.Bridge
                     {
                         using (ExclusiveAccess access = portal.ExclusiveAccess("OpenAutomation export"))
                         {
-                            foreach (Device device in AllDevices(project))
+                            foreach (var entry in AllDevices(project, new List<string>()))
                             {
                                 if (access.IsCancellationRequested) break;
 
-                                var plc = GetSoftware(device) as PlcSoftware;
-                                if (plc == null) continue;
-
+                                Device device = entry.Device;
                                 access.Text = "Exporting " + device.Name;
-                                string plcName = ExportLayout.SafeName(device.Name);
-                                if (plcNames.Contains(plcName))
-                                    throw new InvalidOperationException(
-                                        $"Two PLCs map to the folder name '{plcName}'. Rename one of them.");
-                                plcNames.Add(plcName);
-                                ExportPlc(plc, Path.Combine(_staging, plcName));
+
+                                Software software = GetSoftware(device);
+                                var plc = software as PlcSoftware;
+
+                                var hw = new HwDevice
+                                {
+                                    Name = device.Name,
+                                    TypeIdentifier = device.TypeIdentifier ?? "",
+                                    Group = entry.Group,
+                                    Software = software?.GetType().Name,
+                                };
+                                hw.Items.AddRange(device.DeviceItems.Select(ToHwItem));
+                                Count("device");
+
+                                if (plc != null)
+                                {
+                                    string plcName = ExportLayout.SafeName(device.Name);
+                                    if (plcNames.Contains(plcName))
+                                        throw new InvalidOperationException(
+                                            $"Two PLCs map to the folder name '{plcName}'. Rename one of them.");
+                                    plcNames.Add(plcName);
+                                    hw.Plc = plcName;
+                                    ExportPlc(plc, Path.Combine(_staging, plcName));
+                                }
+
+                                _hardware.Add(hw);
                             }
+
+                            access.Text = "Exporting hardware (AML)";
+                            ExportAml(project);
                         }
                     }
                     finally
@@ -224,13 +247,96 @@ namespace OpenAutomation.Bridge
                     yield return entry;
         }
 
-        private static IEnumerable<Device> AllDevices(Project project) =>
-            project.Devices
-                .Concat(project.UngroupedDevicesGroup.Devices)
-                .Concat(project.DeviceGroups.SelectMany(AllDevices));
+        private struct DeviceEntry
+        {
+            public List<string> Group;
+            public Device Device;
+        }
 
-        private static IEnumerable<Device> AllDevices(DeviceUserGroup group) =>
-            group.Devices.Concat(group.Groups.SelectMany(AllDevices));
+        /// <summary>Every station in the project, including those in sub-folders.</summary>
+        private static IEnumerable<DeviceEntry> AllDevices(Project project, List<string> path)
+        {
+            foreach (Device d in project.Devices)
+                yield return new DeviceEntry { Group = path, Device = d };
+            foreach (Device d in project.UngroupedDevicesGroup.Devices)
+                yield return new DeviceEntry { Group = path, Device = d };
+            foreach (DeviceUserGroup g in project.DeviceGroups)
+                foreach (var e in AllDevices(g, new List<string>(path) { g.Name }))
+                    yield return e;
+        }
+
+        private static IEnumerable<DeviceEntry> AllDevices(DeviceUserGroup group, List<string> path)
+        {
+            foreach (Device d in group.Devices)
+                yield return new DeviceEntry { Group = path, Device = d };
+            foreach (DeviceUserGroup g in group.Groups)
+                foreach (var e in AllDevices(g, new List<string>(path) { g.Name }))
+                    yield return e;
+        }
+
+        private static HwItem ToHwItem(DeviceItem item)
+        {
+            var hw = new HwItem
+            {
+                Name = item.Name,
+                TypeIdentifier = item.TypeIdentifier ?? "",
+                Position = item.PositionNumber,
+            };
+
+            foreach (Address address in item.Addresses)
+            {
+                hw.Addresses.Add(new HwAddress
+                {
+                    IoType = address.IoType.ToString(),
+                    Start = address.StartAddress,
+                    Length = address.Length,
+                });
+            }
+
+            try
+            {
+                NetworkInterface itf = item.GetService<NetworkInterface>();
+                Node node = itf?.Nodes.FirstOrDefault();
+                if (node != null) hw.NetworkAddress = node.GetAttribute("Address") as string;
+            }
+            catch (EngineeringException)
+            {
+                // Items without a network node have no address; that is not an error.
+            }
+
+            hw.Items.AddRange(item.DeviceItems.Select(ToHwItem));
+            return hw;
+        }
+
+        /// <summary>
+        /// CAx (AutomationML) export of the whole project's hardware. Kept next to
+        /// devices.json because it can be imported again, which devices.json cannot.
+        /// </summary>
+        private void ExportAml(Project project)
+        {
+            string dir = Path.Combine(_staging, ExportLayout.Hardware);
+            Directory.CreateDirectory(dir);
+            string aml = Path.Combine(dir, "hardware.aml");
+            string log = Path.Combine(dir, "cax.log");
+
+            try
+            {
+                project.ExportCax(new FileInfo(aml), new FileInfo(log));
+                Count("hardware (AML)");
+            }
+            catch (EngineeringException ex)
+            {
+                Skip("hardware.aml", ex.Message);
+            }
+
+            // The log is the only place where CAx reports partial success.
+            if (File.Exists(log))
+            {
+                string text = File.ReadAllText(log).Trim();
+                if (text.Length > 0) Console.WriteLine("CAx log:\n" + text);
+                File.Delete(log);
+            }
+        }
 
         private static IEnumerable<DeviceItem> Flatten(DeviceItem item) =>
             new[] { item }.Concat(item.DeviceItems.SelectMany(Flatten));
@@ -282,10 +388,30 @@ namespace OpenAutomation.Bridge
                 }
             }
 
+            CommitHardware();
+
             File.WriteAllText(
                 Path.Combine(_output.FullName, ExportLayout.ProjectFile),
                 ExportLayout.ProjectJson(_tiaVersion, plcNames),
                 new UTF8Encoding(false));
+        }
+
+        private void CommitHardware()
+        {
+            string finalDir = Path.Combine(_output.FullName, ExportLayout.Hardware);
+            if (Directory.Exists(finalDir)) Directory.Delete(finalDir, true);
+            Directory.CreateDirectory(finalDir);
+
+            File.WriteAllText(
+                Path.Combine(_output.FullName, ExportLayout.DevicesFile.Replace('/', Path.DirectorySeparatorChar)),
+                HardwareJson.Write(_hardware),
+                new UTF8Encoding(false));
+
+            string stagedAml = Path.Combine(_staging, ExportLayout.Hardware, "hardware.aml");
+            if (File.Exists(stagedAml))
+                XmlNormalizer.NormalizeFile(
+                    stagedAml,
+                    Path.Combine(_output.FullName, ExportLayout.AmlFile.Replace('/', Path.DirectorySeparatorChar)));
         }
 
         private static string NormalizeText(string text) =>

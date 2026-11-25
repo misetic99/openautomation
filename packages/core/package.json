@@ -9,19 +9,32 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
       "default": "./dist/index.js"
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "sideEffects": false,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/openautomation/openautomation.git",
+    "url": "git+https://github.com/misetic99/openautomation.git",
     "directory": "packages/core"
   },
   "dependencies": {
     "fast-xml-parser": "^4.5.0"
+  },
+  "bugs": {
+    "url": "https://github.com/misetic99/openautomation/issues"
+  },
+  "homepage": "https://github.com/misetic99/openautomation/tree/main/packages/core#readme",
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

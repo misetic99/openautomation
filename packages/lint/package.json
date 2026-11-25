@@ -6,9 +6,33 @@
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "exports": { ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" } },
-  "files": ["dist"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "sideEffects": false,
-  "repository": { "type": "git", "url": "git+https://github.com/openautomation/openautomation.git", "directory": "packages/lint" },
-  "dependencies": { "@openautomation/core": "workspace:*" }
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/misetic99/openautomation.git",
+    "directory": "packages/lint"
+  },
+  "dependencies": {
+    "@openautomation/core": "workspace:*"
+  },
+  "bugs": {
+    "url": "https://github.com/misetic99/openautomation/issues"
+  },
+  "homepage": "https://github.com/misetic99/openautomation/tree/main/packages/lint#readme",
+  "engines": {
+    "node": ">=20"
+  },
+  "private": true
 }

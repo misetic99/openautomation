@@ -6,7 +6,9 @@ diff, quality checks and documentation on top of them, without needing a TIA Por
 It covers blocks in every language (LAD, FBD, SCL, STL, GRAPH), DBs, UDTs, tags, hardware and HMI.
 
 > **Status:** early development. The first tool works: from an export folder it generates the
-> I/O list and the tag cross references. See the [roadmap](#roadmap).
+> I/O list, tag cross references and hardware list, plus optional normalized alarm reports.
+> A private offline viewer covers SCL/STL, DBs and tag tables. Native alarm export and LAD/FBD
+> instruction rendering still need verified exports. See the [roadmap](#roadmap).
 
 ## Why
 
@@ -64,7 +66,7 @@ There are no fixed dates. Every step ends with a release that is useful on its o
 | Release | Content |
 | --- | --- |
 | v0.0.1 | Bridge export of blocks, UDTs and tag tables; project model; I/O list and cross references (CSV, Excel) |
-| v0.1 | Deterministic export of the whole project, including hardware (AML); alarm list |
+| v0.1 | Deterministic export of the whole project including hardware (AML); hardware list; I/O list with module; alarm list |
 | v0.2 | Viewer: SCL, STL, DBs, tag tables, then LAD and FBD as SVG; web demo |
 | v0.3 | Semantic diff and pull request review; GitHub Action and GitLab CI |
 | v0.4 | 20 lint rules, 5 of them across PLC, HMI and hardware; VS Code extension |
@@ -89,6 +91,15 @@ node packages/cli/dist/bin.js docs corpus/synthetic/v18/basic --out openautomati
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for how to help.
+
+Preview the private viewer after building:
+
+```sh
+node scripts/render-project.mjs corpus/synthetic/v18/basic openautomation-viewer
+```
+
+Open `openautomation-viewer/index.html`. See the [viewer guide](docs/viewer.md),
+[export format](docs/export-format.md) and [release preparation](docs/releasing.md).
 
 ## Not affiliated with Siemens
 

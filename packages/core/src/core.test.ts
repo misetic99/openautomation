@@ -11,7 +11,13 @@ const fixture = fileURLToPath(
 
 describe("emptyProject", () => {
   it("creates an empty model", () => {
-    expect(emptyProject()).toEqual({ schemaVersion: 1, tiaVersion: "", plcs: [], warnings: [] });
+    expect(emptyProject()).toEqual({
+      schemaVersion: 1,
+      tiaVersion: "",
+      plcs: [],
+      hardware: [],
+      warnings: [],
+    });
   });
 });
 
@@ -122,6 +128,57 @@ describe("loadProject on the synthetic fixture", () => {
       { name: "Setpoint", count: 1 },
       { name: "Start", count: 2 },
     ]);
+  });
+});
+
+describe("hardware", () => {
+  it("loads stations, nested items and address ranges", async () => {
+    const { hardware } = await loadProject(fixture);
+
+    expect(hardware.map((d) => [d.group.join("/"), d.name])).toEqual([
+      ["", "PLC_1"],
+      ["Field", "IO_Device_1"],
+    ]);
+
+    const plc = hardware[0]!;
+    expect(plc.plc).toBe("PLC_1");
+    expect(plc.software).toBe("PlcSoftware");
+    expect(plc.items.map((i) => i.position)).toEqual([1, 2, 3, 4, 5]);
+    expect(plc.items[0]!.items[0]!.networkAddress).toBe("192.168.0.1");
+    expect(plc.items[1]!.addresses).toEqual([{ ioType: "Input", start: 0, length: 16 }]);
+  });
+
+  it("does not treat the hardware folder as a PLC when project.json is missing", async () => {
+    const copy = await mkdtemp(join(tmpdir(), "oa-"));
+    await cp(fixture, copy, { recursive: true });
+    await rm(join(copy, "project.json"));
+
+    const project = await loadProject(copy);
+    expect(project.plcs.map((p) => p.name)).toEqual(["PLC_1"]);
+    await rm(copy, { recursive: true, force: true });
+  });
+
+  it("warns about a broken devices.json and still loads the rest", async () => {
+    const copy = await mkdtemp(join(tmpdir(), "oa-"));
+    await cp(fixture, copy, { recursive: true });
+    await writeFile(join(copy, "hardware", "devices.json"), '{ "format": 2 }');
+
+    const project = await loadProject(copy);
+    expect(project.warnings).toEqual(["hardware/devices.json: unsupported format 2"]);
+    expect(project.hardware).toEqual([]);
+    expect(project.plcs[0]!.blocks.length).toBeGreaterThan(0);
+    await rm(copy, { recursive: true, force: true });
+  });
+
+  it("loads an old export without a hardware folder", async () => {
+    const copy = await mkdtemp(join(tmpdir(), "oa-"));
+    await cp(fixture, copy, { recursive: true });
+    await rm(join(copy, "hardware"), { recursive: true });
+
+    const project = await loadProject(copy);
+    expect(project.hardware).toEqual([]);
+    expect(project.warnings).toEqual([]);
+    await rm(copy, { recursive: true, force: true });
   });
 });
 
