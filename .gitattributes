@@ -1,0 +1,7 @@
+* text=auto eol=lf
+*.cs text eol=crlf
+*.sln text eol=crlf
+*.csproj text eol=crlf
+# Exported TIA data must stay byte-identical across platforms
+corpus/** -text
+examples/**/export/** -text

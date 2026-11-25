@@ -1,0 +1,22 @@
+{
+  "name": "openautomation-monorepo",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Open tooling that turns a TIA Portal project into readable text files, with review, diff, lint and documentation on top.",
+  "license": "MIT",
+  "packageManager": "pnpm@9.15.0",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "tsc -b packages/core packages/render packages/diff packages/lint packages/docs-gen packages/cli",
+    "test": "vitest run",
+    "clean": "node -e \"require('fs').readdirSync('packages').forEach(p=>{for(const d of ['dist','tsconfig.tsbuildinfo'])require('fs').rmSync('packages/'+p+'/'+d,{recursive:true,force:true})})\"",
+    "changeset": "changeset",
+    "release": "pnpm build && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.9",
+    "@types/node": "^20.16.0",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  }
+}

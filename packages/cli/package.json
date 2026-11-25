@@ -1,0 +1,19 @@
+{
+  "name": "openautomation",
+  "version": "0.0.0",
+  "description": "Command line interface for OpenAutomation",
+  "license": "MIT",
+  "type": "module",
+  "bin": { "openautomation": "./dist/bin.js" },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "repository": { "type": "git", "url": "git+https://github.com/openautomation/openautomation.git", "directory": "packages/cli" },
+  "dependencies": {
+    "@openautomation/core": "workspace:*",
+    "@openautomation/diff": "workspace:*",
+    "@openautomation/docs-gen": "workspace:*",
+    "@openautomation/lint": "workspace:*",
+    "@openautomation/render": "workspace:*"
+  }
+}

@@ -1,0 +1,7 @@
+name: OpenAutomation
+description: Review, diff and lint exported TIA Portal projects in pull requests
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: echo "OpenAutomation action is not implemented yet" && exit 1

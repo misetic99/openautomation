@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <!-- TIA Portal V17-V19 Openness needs .NET Framework 4.8. Newer versions can target modern .NET. -->
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <RootNamespace>OpenAutomation.Bridge</RootNamespace>
+    <AssemblyName>openautomation-bridge</AssemblyName>
+  </PropertyGroup>
+
+  <!--
+    Siemens.Engineering.dll ships with TIA Portal and cannot be redistributed.
+    Set TiaOpennessDll to its path to build the real exporter, for example:
+      dotnet build -p:TiaOpennessDll="C:\Program Files\Siemens\Automation\Portal V18\PublicAPI\V18\Siemens.Engineering.dll"
+  -->
+  <ItemGroup Condition="'$(TiaOpennessDll)' != ''">
+    <Reference Include="Siemens.Engineering">
+      <HintPath>$(TiaOpennessDll)</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(TiaOpennessDll)' != ''">
+    <DefineConstants>$(DefineConstants);TIA_OPENNESS</DefineConstants>
+  </PropertyGroup>
+
+</Project>

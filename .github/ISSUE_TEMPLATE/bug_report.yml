@@ -1,0 +1,28 @@
+name: Bug report
+description: Something does not work as expected
+labels: [bug]
+body:
+  - type: input
+    id: tia-version
+    attributes:
+      label: TIA Portal version
+      placeholder: V18 Update 3
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: OpenAutomation version
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: A minimal, anonymized export is ideal. Do not attach customer code.
