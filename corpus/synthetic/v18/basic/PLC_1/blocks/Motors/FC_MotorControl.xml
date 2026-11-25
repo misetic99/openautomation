@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Document>
+  <Engineering version="V18" />
+  <SW.Blocks.FC ID="0">
+    <AttributeList>
+      <Interface>
+        <Sections xmlns="http://www.siemens.com/automation/Openness/SW/Interface/v5">
+          <Section Name="Input" />
+          <Section Name="Output" />
+          <Section Name="InOut" />
+          <Section Name="Temp" />
+          <Section Name="Constant" />
+          <Section Name="Return">
+            <Member Name="Ret_Val" Datatype="Void" />
+          </Section>
+        </Sections>
+      </Interface>
+      <Name>FC_MotorControl</Name>
+      <Number>1</Number>
+      <ProgrammingLanguage>SCL</ProgrammingLanguage>
+    </AttributeList>
+    <ObjectList>
+      <SW.Blocks.CompileUnit ID="1" CompositionName="CompileUnits">
+        <AttributeList>
+          <NetworkSource>
+            <StructuredText xmlns="http://www.siemens.com/automation/Openness/SW/NetworkSource/StructuredText/v3">
+              <Access Scope="GlobalVariable" UId="21">
+                <Symbol UId="22">
+                  <Component Name="MotorRun" UId="23" />
+                </Symbol>
+              </Access>
+              <Token Text=":=" UId="24" />
+              <Blank Num="1" UId="25" />
+              <Access Scope="GlobalVariable" UId="26">
+                <Symbol UId="27">
+                  <Component Name="Start" UId="28" />
+                </Symbol>
+              </Access>
+              <Blank Num="1" UId="29" />
+              <Token Text="AND" UId="30" />
+              <Blank Num="1" UId="31" />
+              <Access Scope="GlobalVariable" UId="32">
+                <Symbol UId="33">
+                  <Component Name="Stop" UId="34" />
+                </Symbol>
+              </Access>
+              <Token Text=";" UId="35" />
+              <NewLine Num="1" UId="36" />
+              <Access Scope="GlobalVariable" UId="37">
+                <Symbol UId="38">
+                  <Component Name="DB_Motors" UId="39" />
+                  <Token Text="." UId="40" />
+                  <Component Name="Motor1" UId="41" />
+                  <Token Text="." UId="42" />
+                  <Component Name="Enable" UId="43" />
+                </Symbol>
+              </Access>
+              <Token Text=":=" UId="44" />
+              <Blank Num="1" UId="45" />
+              <Access Scope="GlobalVariable" UId="46">
+                <Symbol UId="47">
+                  <Component Name="MotorRun" UId="48" />
+                </Symbol>
+              </Access>
+              <Token Text=";" UId="49" />
+            </StructuredText>
+          </NetworkSource>
+          <ProgrammingLanguage>SCL</ProgrammingLanguage>
+        </AttributeList>
+      </SW.Blocks.CompileUnit>
+    </ObjectList>
+  </SW.Blocks.FC>
+</Document>

@@ -5,7 +5,8 @@ diff, quality checks and documentation on top of them, without needing a TIA Por
 
 It covers blocks in every language (LAD, FBD, SCL, STL, GRAPH), DBs, UDTs, tags, hardware and HMI.
 
-> **Status:** early development. Nothing is usable yet. See the [roadmap](#roadmap).
+> **Status:** early development. The first tool works: from an export folder it generates the
+> I/O list and the tag cross references. See the [roadmap](#roadmap).
 
 ## Why
 
@@ -58,16 +59,17 @@ deterministic: two consecutive exports of the same project give zero differences
 
 ## Roadmap
 
-| Release | Target | Content |
-| --- | --- | --- |
-| v0.1 | Jan–Feb 2027 | Bridge, project model, I/O list, alarm list and cross-references |
-| v0.2 | Mar–Apr 2027 | Viewer: SCL, STL, DBs, tag tables, then LAD and FBD as SVG; web demo |
-| v0.3 | May–Jun 2027 | Semantic diff and pull request review; GitHub Action and GitLab CI |
-| v0.4 | Jul–Aug 2027 | 20 lint rules, 5 of them across PLC, HMI and hardware; VS Code extension |
-| v0.5 | Sep–Nov 2027 | Generator (standard blocks and tags from YAML or Excel), HMI screens, MCP server |
-| v1.0 | Dec 2027 | Stable API |
+There are no fixed dates. Every step ends with a release that is useful on its own.
 
-Dates are approximate. Every phase ends with a release that is useful on its own.
+| Release | Content |
+| --- | --- |
+| v0.0.1 | Bridge export of blocks, UDTs and tag tables; project model; I/O list and cross references (CSV, Excel) |
+| v0.1 | Deterministic export of the whole project, including hardware (AML); alarm list |
+| v0.2 | Viewer: SCL, STL, DBs, tag tables, then LAD and FBD as SVG; web demo |
+| v0.3 | Semantic diff and pull request review; GitHub Action and GitLab CI |
+| v0.4 | 20 lint rules, 5 of them across PLC, HMI and hardware; VS Code extension |
+| v0.5 | Generator (standard blocks and tags from YAML or Excel), HMI screens, MCP server |
+| v1.0 | Stable API |
 
 ## Development
 
@@ -78,6 +80,12 @@ Requires Node.js 20+ and [pnpm](https://pnpm.io). The bridge additionally needs 
 pnpm install
 pnpm build
 pnpm test
+```
+
+Try it on the synthetic example:
+
+```sh
+node packages/cli/dist/bin.js docs corpus/synthetic/v18/basic --out openautomation-docs
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for how to help.

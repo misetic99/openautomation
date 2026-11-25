@@ -29,3 +29,6 @@ Thumbs.db
 *.zap19
 *.zap20
 *.zap21
+
+# Generated documentation
+openautomation-docs/

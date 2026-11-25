@@ -26,4 +26,8 @@
     <DefineConstants>$(DefineConstants);TIA_OPENNESS</DefineConstants>
   </PropertyGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="OpenAutomation.Bridge.Tests" />
+  </ItemGroup>
+
 </Project>

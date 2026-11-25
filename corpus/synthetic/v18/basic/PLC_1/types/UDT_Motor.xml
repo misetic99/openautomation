@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Document>
+  <Engineering version="V18" />
+  <SW.Types.PlcStruct ID="0">
+    <AttributeList>
+      <Interface>
+        <Sections xmlns="http://www.siemens.com/automation/Openness/SW/Interface/v5">
+          <Section Name="None">
+            <Member Name="Enable" Datatype="Bool" />
+            <Member Name="Speed" Datatype="Int">
+              <Comment>
+                <MultiLanguageText Lang="en-US">Speed in rpm</MultiLanguageText>
+              </Comment>
+            </Member>
+            <Member Name="Limits" Datatype="Struct">
+              <Member Name="Min" Datatype="Int" />
+              <Member Name="Max" Datatype="Int" />
+            </Member>
+          </Section>
+        </Sections>
+      </Interface>
+      <Name>UDT_Motor</Name>
+    </AttributeList>
+  </SW.Types.PlcStruct>
+</Document>

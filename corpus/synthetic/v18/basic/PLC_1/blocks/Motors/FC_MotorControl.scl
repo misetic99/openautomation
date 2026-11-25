@@ -1,0 +1,7 @@
+FUNCTION "FC_MotorControl" : Void
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 0.1
+BEGIN
+    "MotorRun" := "Start" AND "Stop";
+    "DB_Motors".Motor1.Enable := "MotorRun";
+END_FUNCTION

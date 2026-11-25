@@ -1,0 +1,7 @@
+{
+  "format": 1,
+  "tiaVersion": "V18",
+  "plcs": [
+    "PLC_1"
+  ]
+}

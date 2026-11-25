@@ -27,4 +27,4 @@ jobs:
         with:
           dotnet-version: 8.0.x
       # Builds without the Siemens reference; the real exporter needs a local TIA Portal.
-      - run: dotnet build bridge/src
+      - run: dotnet test bridge/OpenAutomation.Bridge.sln
